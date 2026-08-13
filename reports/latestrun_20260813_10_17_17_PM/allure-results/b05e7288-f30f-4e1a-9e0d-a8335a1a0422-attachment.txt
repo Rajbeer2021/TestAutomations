@@ -1,0 +1,5 @@
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_03: Enter Password[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Enter Password
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert - Password Input Visible
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_03: Enter Password — PASS (1.107s)[0m

@@ -1,0 +1,3 @@
+timestamp,total,passed,failed,skipped,pass_rate,time
+2026-08-13 22:07:23,5,4,1,0,80.0,21.786
+2026-08-13 22:07:24,5,4,1,0,80.0,21.786

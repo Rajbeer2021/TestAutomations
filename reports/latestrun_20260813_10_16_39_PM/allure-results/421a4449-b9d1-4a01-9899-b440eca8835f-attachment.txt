@@ -1,0 +1,6 @@
+[32mINFO    [0m utils.logger:base_test.py:35 [START SUITE] ===== Starting Suite: test_02_LoginHRM  =====
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_01: Verify user is able to launch url[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Navigate to login page
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert1 - Verify login page is visible
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_01: Verify user is able to launch url — PASS (1.551s)[0m

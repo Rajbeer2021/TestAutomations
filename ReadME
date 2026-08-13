@@ -1,0 +1,143 @@
+# Create virtual environment
+python -m venv .venv
+
+# Activate it
+.venv\Scripts\activate
+
+# Install all project dependencies
+pip install -r requirements.txt
+
+# Install Playwright browser binaries
+playwright install
+
+# Run tests
+pytest
+
+# install all browsers
+playwright install
+
+# Or install only Chromium:
+playwright install chromium
+
+
+# Verify the installation
+pip list
+
+# or check a specific package:
+
+pip show playwright
+
+# delete file
+rmdir filename/folder
+
+# install playwright 
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate it
+.venv\Scripts\activate
+
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Install Playwright
+pip install playwright
+
+# Install browser binaries
+playwright install
+
+# Install pytest (optional but recommended)
+pip install pytest pytest-playwright
+
+
+# how to run tests
+
+Run a single test file (Recommended)
+pytest tests/login.py
+
+or
+
+python -m pytest tests/login.py
+4. Run all tests
+pytest
+
+or
+
+pytest tests
+5. Run with verbose output
+pytest -v tests/login.py
+
+Example output:
+
+============================= test session starts =============================
+
+tests/login.py::test_valid_login PASSED
+tests/login.py::test_invalid_login PASSED
+
+======================== 2 passed in 6.24s ========================
+6. Run a specific test function
+
+Suppose login.py contains:
+
+def test_valid_login():
+    ...
+
+def test_invalid_login():
+    ...
+
+Run only one test:
+
+pytest tests/login.py::test_valid_login
+7. Show browser while running
+
+If your test launches the browser with:
+
+browser = playwright.chromium.launch(headless=False)
+
+then run normally:
+
+pytest tests/login.py
+
+If your code uses a headless option controlled by configuration, make sure it's set to False to see the browser.
+
+8. Run tests in paralle
+Install:
+
+pip install pytest-xdist
+
+Run:
+
+pytest -n 4
+
+9. Generate an HTML report (after installing pytest-html)
+
+Install:
+
+pip install pytest-html
+
+Run:
+
+pytest --html=report.html
+10. Run with console logs
+pytest -v -s tests/login.py
+-v = verbose output
+-s = shows print() output in the console
+
+# Common pytest commands
+
+| Command                                   | Purpose                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| `pytest`                                  | Run all tests                                                                         |
+| `pytest tests`                            | Run all tests in the `tests` folder                                                   |
+| `pytest tests/login.py`                   | Run one test file                                                                     |
+| `pytest tests/login.py::test_valid_login` | Run one test function                                                                 |
+| `pytest -v`                               | Verbose output                                                                        |
+| `pytest -s`                               | Show `print()` statements                                                             |
+| `pytest -v -s`                            | Verbose + show console output                                                         |
+| `pytest -k login`                         | Run tests whose names match `login`                                                   |
+| `pytest -m smoke`                         | Run tests marked with `@pytest.mark.smoke`                                            |
+| `pytest --headed`                         | Run Playwright tests with a visible browser (when using the Playwright pytest plugin) |
+| `pytest --browser chromium`               | Run tests in Chromium (with the Playwright pytest plugin)                             |
+| `pytest --browser firefox`                | Run tests in Firefox (with the Playwright pytest plugin)                              |
+| `pytest --browser webkit`                 | Run tests in WebKit (with the Playwright pytest plugin)                               |

@@ -1,0 +1,21 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Test reports
+test-results/
+playwright-report/
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs
+*.log

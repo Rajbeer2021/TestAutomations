@@ -1,0 +1,9 @@
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_02: Login into HRM[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Enter Username
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert2 - Verify Username field visible
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Enter Password
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert3 - Verify Password field visible
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Click on Login button
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert4 - Verify Profile Picture visible after login
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_02: Login into HRM — PASS (6.84s)[0m

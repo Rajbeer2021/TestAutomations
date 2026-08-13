@@ -1,0 +1,58 @@
+[
+    {
+        "name": "test_navigate_to_login_page",
+        "nodeid": "tests/test_01_LoginHRM.py::TestLoginOrangeHRM::test_navigate_to_login_page",
+        "outcome": "passed",
+        "location": "('tests\\\\test_01_LoginHRM.py', 32, 'TestLoginOrangeHRM.test_navigate_to_login_page')",
+        "duration": 6.13957090000622
+    },
+    {
+        "name": "test_enter_username",
+        "nodeid": "tests/test_01_LoginHRM.py::TestLoginOrangeHRM::test_enter_username",
+        "outcome": "passed",
+        "location": "('tests\\\\test_01_LoginHRM.py', 42, 'TestLoginOrangeHRM.test_enter_username')",
+        "duration": 0.9813665000256151
+    },
+    {
+        "name": "test_enter_password",
+        "nodeid": "tests/test_01_LoginHRM.py::TestLoginOrangeHRM::test_enter_password",
+        "outcome": "passed",
+        "location": "('tests\\\\test_01_LoginHRM.py', 55, 'TestLoginOrangeHRM.test_enter_password')",
+        "duration": 1.1686084000393748
+    },
+    {
+        "name": "test_click_login_button",
+        "nodeid": "tests/test_01_LoginHRM.py::TestLoginOrangeHRM::test_click_login_button",
+        "outcome": "passed",
+        "location": "('tests\\\\test_01_LoginHRM.py', 69, 'TestLoginOrangeHRM.test_click_login_button')",
+        "duration": 3.1322705999482423
+    },
+    {
+        "name": "test_logout_from_HRM",
+        "nodeid": "tests/test_01_LoginHRM.py::TestLoginOrangeHRM::test_logout_from_HRM",
+        "outcome": "passed",
+        "location": "('tests\\\\test_01_LoginHRM.py', 83, 'TestLoginOrangeHRM.test_logout_from_HRM')",
+        "duration": 2.440165500040166
+    },
+    {
+        "name": "test_navigate_to_orangeHRM",
+        "nodeid": "tests/test_02_LoginHRM.py::TestLoginHRM::test_navigate_to_orangeHRM",
+        "outcome": "passed",
+        "location": "('tests\\\\test_02_LoginHRM.py', 29, 'TestLoginHRM.test_navigate_to_orangeHRM')",
+        "duration": 2.26910059992224
+    },
+    {
+        "name": "test_Login_into_HRM",
+        "nodeid": "tests/test_02_LoginHRM.py::TestLoginHRM::test_Login_into_HRM",
+        "outcome": "passed",
+        "location": "('tests\\\\test_02_LoginHRM.py', 34, 'TestLoginHRM.test_Login_into_HRM')",
+        "duration": 6.834934800048359
+    },
+    {
+        "name": "test_Logout_from_HRM",
+        "nodeid": "tests/test_02_LoginHRM.py::TestLoginHRM::test_Logout_from_HRM",
+        "outcome": "passed",
+        "location": "('tests\\\\test_02_LoginHRM.py', 39, 'TestLoginHRM.test_Logout_from_HRM')",
+        "duration": 2.9123051000060514
+    }
+]

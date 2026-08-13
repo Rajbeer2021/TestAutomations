@@ -1,0 +1,5 @@
+[32mINFO    [0m utils.logger:base_test.py:35 [START SUITE] ===== Starting Suite: test_01_LoginHRM  =====
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_01: Verify HRM URL launches and login page loads[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Navigate to Login Page
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_01: Verify HRM URL launches and login page loads — PASS (6.149s)[0m

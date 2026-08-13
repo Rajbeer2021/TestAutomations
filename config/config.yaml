@@ -1,0 +1,121 @@
+# ---------------- Default Environment ----------------------
+default: dev
+
+# ---------------- Environment-specific Settings ----------
+environments:
+  stage:
+    base_url: "https://customercenter-newlz.s.dev.wsj.com/public"
+    username: "nue12302023062216@yopmail.com"
+    password: "password1"
+
+  dev:
+    base_url: "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+    username: "Admin"
+    password: "admin123"
+    api_base_url: "https://api.dev.orangehrmlive.com"
+    feature_flags:
+      new_dashboard: true
+      enable_beta_api: false
+
+  qa:
+    base_url: "https://qa-demo.orangehrmlive.com/web/index.php/auth/login"
+    username: "QAUser"
+    password: "qa12345"
+
+# ---------------- Browser Settings ------------------------
+browser:
+  type: chromium
+  headless: false
+  slow_mo: 50
+  viewport: null
+  chrome_executable: "C:/Program Files/Google/Chrome/Application/chrome.exe"
+  edge_executable: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+  video: true
+
+# ---------------- Timeout / Wait Settings -----------------
+timeouts:
+  default: 10000
+  hover: 5000
+  click: 10000
+  api: 30
+  db: 10
+  retry_interval: 2500
+
+# ---------------- Reporting / Logging ---------------------
+reporting:
+  html_report_dir: "reports/html"
+  custom_report_dir: "reports/custom_reports"
+  screenshots_on_fail: true
+  log_level: "INFO"
+  log_file: "reports/logs/automation.log"
+
+# ---------------- Database Settings ----------------------
+databases:
+  mysql:
+    host: "localhost"
+    port: 3306
+    user: "root"
+    password: "root"
+    database: "hrm_db"
+  sqlserver:
+    host: "sqlserver.local"
+    user: "sa"
+    password: "Password123"
+    database: "HRMDB"
+  mongodb:
+    uri: "mongodb://localhost:27017/"
+    database: "hrm_mongo_db"
+
+# ---------------- API Settings ---------------------------
+api:
+  default_headers:
+    Content-Type: "application/json"
+    Accept: "application/json"
+  auth_token: ""
+
+# ---------------- Feature Toggles ------------------------
+features:
+  enable_ui_tests: true
+  enable_api_tests: true
+  enable_db_tests: true
+  enable_screenshots: true
+  enable_logging: true
+
+# ---------------- Retry / Flaky Test Settings -------------
+retry:
+  max_attempts: 5
+  max_reload_wait_ms: 10000
+  retry_interval_ms: 2500
+
+# ---------------- Test Data / Payload ---------------------
+test_data:
+  payload_dir: "TestData/JsonPayload"
+  csv_dir: "TestData/CSV"
+
+# ---------------- Random Data / Utils ---------------------
+random_data:
+  default_string_length: 8
+  default_number_range:
+    min: 1000
+    max: 9999
+  password_policy:
+    min_length: 8
+    include_uppercase: true
+    include_lowercase: true
+    include_digits: true
+    include_special_chars: true
+
+# ---------------- Pytest / Suite Settings -----------------
+pytest:
+  markers:
+    - ui: "Marks UI tests"
+    - api: "Marks API tests"
+    - db: "Marks DB tests"
+    - smoke: "Smoke"
+    - sanity: "Sanity"
+    - regression: "Regression"
+  addopts: "-v --capture=no"
+  default_suite: "DefaultSuite"
+  parallel: 2
+  reruns: 2
+

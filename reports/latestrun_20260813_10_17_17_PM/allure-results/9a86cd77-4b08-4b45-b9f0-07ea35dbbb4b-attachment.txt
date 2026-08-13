@@ -1,0 +1,5 @@
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_04: Click Login and Verify Home Page[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Click on Login Button
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert - Home Page Loaded
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_04: Click Login and Verify Home Page — PASS (3.303s)[0m

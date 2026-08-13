@@ -1,0 +1,30 @@
+# --- Core testing framework ---
+pytest
+pytest-playwright
+playwright
+
+# --- Reporting / HTML / Allure ---
+pytest-html
+pytest-rerunfailures
+pytest-xdist
+allure-pytest
+allure-python-commons
+pytest-base-url
+
+# --- Data / visualization ---
+pyyaml
+pandas
+numpy
+matplotlib
+seaborn
+plotly
+dash
+kaleido
+colorama
+
+# --- Document / reporting tools ---
+openpyxl
+python-docx
+python-pptx
+reportlab
+jinja2

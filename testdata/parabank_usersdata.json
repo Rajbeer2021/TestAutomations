@@ -1,0 +1,26 @@
+[
+  {
+    "first_name": "Rajveer",
+    "last_name": "Singh",
+    "address": "Indore",
+    "city": "MP",
+    "state": "US",
+    "zipcode": "452011",
+    "phone": "9066161055",
+    "ssn": "54546",
+    "username": "",
+    "password": "m2zUa5z8@U2v@"
+  },
+  {
+    "first_name": "Amit",
+    "last_name": "Sharma",
+    "address": "Delhi",
+    "city": "DL",
+    "state": "IN",
+    "zipcode": "110011",
+    "phone": "9876543210",
+    "ssn": "12345",
+    "username": "",
+    "password": "Test@1234"
+  }
+]

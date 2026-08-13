@@ -1,0 +1,5 @@
+[32mINFO    [0m CustomReporter:customreporter.py:121 
+[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_02: Enter Username[0m
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Enter Username
+[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert - Verify Username Entered
+[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_02: Enter Username — PASS (1.14s)[0m
