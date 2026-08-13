@@ -1,5 +1,0 @@
-Locator.wait_for: Timeout 10000ms exceeded.
-Call log:
-  - waiting for get_by_role("menuitem", name="Logout__SS").first to be visible
-    - waiting for" https://opensource-demo.orangehrmlive.com/web/index.php/auth/logout" navigation to finish...
-    - navigated to "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
