@@ -1,9 +1,0 @@
-[32mINFO    [0m CustomReporter:customreporter.py:121 
-[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_05: Logout from HRM[0m
-[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Click Profile Picture
-[31m[1mERROR   [0m PlaywrightLogger:actionUtils.py:90 [STEP FAILED] Click Profile Picture — Locator.wait_for: Timeout 10000ms exceeded.
-Call log:
-  - waiting for get_by_role("menuitem", name="Logout__SS").first to be visible
-[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[31m[END TEST] Test_05: Logout from HRM — FAIL (10.747s)[0m
-
-[32mINFO    [0m utils.logger:base_test.py:52 [END SUITE] ===== Ending Suite: test_01_LoginHRM =====
