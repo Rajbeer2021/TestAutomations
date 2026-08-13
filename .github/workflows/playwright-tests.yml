@@ -1,0 +1,55 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      headed:
+        description: "Run Playwright in headed mode?"
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Install Playwright browsers
+      - name: Install Playwright browsers
+        run: |
+          playwright install --with-deps chromium
+
+      # 5. Run Playwright tests
+      - name: Run pytest - Headless
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.headed }}
+        run: |
+          pytest -v
+
+      # 6. Run Playwright tests - Headed
+      - name: Run pytest - Headed
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.headed }}
+        run: |
+          xvfb-run -a pytest -v --headed
