@@ -32,8 +32,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+
       # ==========================================================
-      # 2. Download reports from Playwright Tests workflow
+      # 2. Download Playwright reports
       # ==========================================================
       - name: Download Playwright Reports
         uses: actions/download-artifact@v5
@@ -43,27 +44,93 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
-      # ==========================================================
-      # 3. Check downloaded files
-      # ==========================================================
-      - name: List report files
-        run: |
-          echo "========== REPORT FILES =========="
-          find reports -type f
-          echo "=================================="
 
       # ==========================================================
-      # 4. Prepare dashboard as index.html
+      # 3. Show EXACT downloaded structure
       # ==========================================================
-      - name: Prepare Dashboard
+      - name: Inspect downloaded reports
         run: |
+          echo ""
+          echo "=============================================="
+          echo "DOWNLOADED REPORT STRUCTURE"
+          echo "=============================================="
+
+          find reports -type f | sort
+
+          echo ""
+          echo "=============================================="
+          echo "DIRECTORIES"
+          echo "=============================================="
+
+          find reports -type d | sort
+
+          echo ""
+          echo "=============================================="
+
+
+
+      # ==========================================================
+      # 4. Prepare GitHub Pages root
+      # ==========================================================
+      - name: Prepare GitHub Pages
+        run: |
+
+          echo "Preparing GitHub Pages..."
+
+          # ------------------------------------------------------
+          # Main dashboard
+          # ------------------------------------------------------
+
           if [ -f reports/custom_reports/dashboard.html ]; then
+
             cp reports/custom_reports/dashboard.html reports/index.html
-            echo "Dashboard copied successfully."
+
+            echo "Main dashboard copied:"
+            echo "reports/index.html"
+
           else
+
             echo "ERROR: dashboard.html not found!"
             exit 1
+
           fi
+
+
+          # ------------------------------------------------------
+          # Verify suite reports
+          # ------------------------------------------------------
+
+          echo ""
+          echo "Checking suite reports..."
+
+          if [ -f reports/test_01_LoginHRM/test_01_LoginHRM_report.html ]; then
+            echo "FOUND: test_01_LoginHRM report"
+          else
+            echo "WARNING: test_01_LoginHRM report NOT FOUND"
+          fi
+
+
+          if [ -f reports/test_02_LoginHRM/test_02_LoginHRM_report.html ]; then
+            echo "FOUND: test_02_LoginHRM report"
+          else
+            echo "WARNING: test_02_LoginHRM report NOT FOUND"
+          fi
+
+
+          # ------------------------------------------------------
+          # Final structure
+          # ------------------------------------------------------
+
+          echo ""
+          echo "=============================================="
+          echo "FINAL GITHUB PAGES STRUCTURE"
+          echo "=============================================="
+
+          find reports -type f | sort
+
+          echo "=============================================="
+
+
 
       # ==========================================================
       # 5. Configure GitHub Pages
@@ -71,16 +138,18 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+
       # ==========================================================
-      # 6. Upload dashboard to GitHub Pages
+      # 6. Upload EVERYTHING to GitHub Pages
       # ==========================================================
-      - name: Upload Dashboard
+      - name: Upload Dashboard and Reports
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./reports
 
+
       # ==========================================================
-      # 7. Deploy dashboard
+      # 7. Deploy
       # ==========================================================
       - name: Deploy to GitHub Pages
         id: deployment
