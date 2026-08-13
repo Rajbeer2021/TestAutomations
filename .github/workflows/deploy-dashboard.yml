@@ -34,7 +34,7 @@ jobs:
 
 
       # ==========================================================
-      # 2. Download Playwright reports
+      # 2. Download Playwright artifact
       # ==========================================================
       - name: Download Playwright Reports
         uses: actions/download-artifact@v5
@@ -46,46 +46,36 @@ jobs:
 
 
       # ==========================================================
-      # 3. Show EXACT downloaded structure
+      # 3. Inspect downloaded files
       # ==========================================================
-      - name: Inspect downloaded reports
+      - name: Inspect reports
         run: |
-          echo ""
-          echo "=============================================="
-          echo "DOWNLOADED REPORT STRUCTURE"
-          echo "=============================================="
+          echo "=========================================="
+          echo "DOWNLOADED REPORT FILES"
+          echo "=========================================="
 
           find reports -type f | sort
 
-          echo ""
-          echo "=============================================="
-          echo "DIRECTORIES"
-          echo "=============================================="
-
-          find reports -type d | sort
-
-          echo ""
-          echo "=============================================="
-
+          echo "=========================================="
 
 
       # ==========================================================
-      # 4. Prepare GitHub Pages root
+      # 4. Prepare GitHub Pages
       # ==========================================================
       - name: Prepare GitHub Pages
         run: |
 
-          echo "Preparing GitHub Pages..."
+          echo "Preparing reports..."
 
           # ------------------------------------------------------
-          # Main dashboard
+          # Main Dashboard
           # ------------------------------------------------------
 
           if [ -f reports/custom_reports/dashboard.html ]; then
 
             cp reports/custom_reports/dashboard.html reports/index.html
 
-            echo "Main dashboard copied:"
+            echo "Dashboard:"
             echo "reports/index.html"
 
           else
@@ -97,23 +87,35 @@ jobs:
 
 
           # ------------------------------------------------------
-          # Verify suite reports
+          # Pytest HTML Report
           # ------------------------------------------------------
 
-          echo ""
-          echo "Checking suite reports..."
+          if [ -f reports/PytestReport.html ]; then
+
+            echo "PytestReport.html found."
+
+          else
+
+            echo "WARNING: PytestReport.html not found."
+
+          fi
+
+
+          # ------------------------------------------------------
+          # Suite Reports
+          # ------------------------------------------------------
 
           if [ -f reports/test_01_LoginHRM/test_01_LoginHRM_report.html ]; then
-            echo "FOUND: test_01_LoginHRM report"
+            echo "test_01_LoginHRM report found."
           else
-            echo "WARNING: test_01_LoginHRM report NOT FOUND"
+            echo "WARNING: test_01_LoginHRM report not found."
           fi
 
 
           if [ -f reports/test_02_LoginHRM/test_02_LoginHRM_report.html ]; then
-            echo "FOUND: test_02_LoginHRM report"
+            echo "test_02_LoginHRM report found."
           else
-            echo "WARNING: test_02_LoginHRM report NOT FOUND"
+            echo "WARNING: test_02_LoginHRM report not found."
           fi
 
 
@@ -122,14 +124,13 @@ jobs:
           # ------------------------------------------------------
 
           echo ""
-          echo "=============================================="
+          echo "=========================================="
           echo "FINAL GITHUB PAGES STRUCTURE"
-          echo "=============================================="
+          echo "=========================================="
 
           find reports -type f | sort
 
-          echo "=============================================="
-
+          echo "=========================================="
 
 
       # ==========================================================
@@ -140,9 +141,9 @@ jobs:
 
 
       # ==========================================================
-      # 6. Upload EVERYTHING to GitHub Pages
+      # 6. Upload ALL reports
       # ==========================================================
-      - name: Upload Dashboard and Reports
+      - name: Upload Reports
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./reports
