@@ -1,0 +1,87 @@
+name: Deploy Playwright Dashboard
+
+on:
+  workflow_run:
+    workflows: ["Playwright Tests"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+jobs:
+
+  deploy:
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      # ==========================================================
+      # 1. Checkout repository
+      # ==========================================================
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # ==========================================================
+      # 2. Download reports from Playwright Tests workflow
+      # ==========================================================
+      - name: Download Playwright Reports
+        uses: actions/download-artifact@v5
+        with:
+          name: playwright-test-reports
+          path: reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      # ==========================================================
+      # 3. Check downloaded files
+      # ==========================================================
+      - name: List report files
+        run: |
+          echo "========== REPORT FILES =========="
+          find reports -type f
+          echo "=================================="
+
+      # ==========================================================
+      # 4. Prepare dashboard as index.html
+      # ==========================================================
+      - name: Prepare Dashboard
+        run: |
+          if [ -f reports/custom_reports/dashboard.html ]; then
+            cp reports/custom_reports/dashboard.html reports/index.html
+            echo "Dashboard copied successfully."
+          else
+            echo "ERROR: dashboard.html not found!"
+            exit 1
+          fi
+
+      # ==========================================================
+      # 5. Configure GitHub Pages
+      # ==========================================================
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # ==========================================================
+      # 6. Upload dashboard to GitHub Pages
+      # ==========================================================
+      - name: Upload Dashboard
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./reports
+
+      # ==========================================================
+      # 7. Deploy dashboard
+      # ==========================================================
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
