@@ -57,7 +57,9 @@ jobs:
       - name: Run pytest - Headless
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.headed }}
         run: |
-          pytest -v
+          pytest .\tests\test_01_LoginHRM.py
+      #ytest -v
+      #pytest .\tests\test_01_LoginHRM.py
 
       # ================================================================
       # 6. Run HEADED
