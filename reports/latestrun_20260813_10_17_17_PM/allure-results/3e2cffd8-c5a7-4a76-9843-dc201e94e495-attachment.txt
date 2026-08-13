@@ -1,8 +1,0 @@
-[32mINFO    [0m CustomReporter:customreporter.py:121 
-[32mINFO    [0m CustomReporter:customreporter.py:122 [96m[START TEST] Test_05: Logout from HRM[0m
-[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Click Profile Picture
-[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Assert - Logout Menu Visible
-[32mINFO    [0m PlaywrightLogger:actionUtils.py:74 [START STEP] Click Logout
-[32mINFO    [0m CustomReporter:customreporter.py:193 [1m[32m[END TEST] Test_05: Logout from HRM — PASS (2.251s)[0m
-
-[32mINFO    [0m utils.logger:base_test.py:52 [END SUITE] ===== Ending Suite: test_01_LoginHRM =====
