@@ -2,10 +2,12 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
   workflow_dispatch:
     inputs:
@@ -15,70 +17,939 @@ on:
         default: false
         type: boolean
 
+      browser:
+        description: "Select browser"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+
+      test_file:
+        description: "Test file to execute"
+        required: true
+        default: "tests/test_01_LoginHRM.py"
+        type: string
+
+
+# ================================================================
+# PERMISSIONS
+# ================================================================
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+
+# ================================================================
+# JOBS
+# ================================================================
+
 jobs:
 
+  # ================================================================
+  # PLAYWRIGHT TEST JOB
+  # ================================================================
+
   test:
+
+    name: Playwright Tests
+
     runs-on: ubuntu-latest
 
     steps:
 
-      # ================================================================
-      # 1. Checkout
-      # ================================================================
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # ============================================================
+      # 1. CHECKOUT
+      # ============================================================
 
-      # ================================================================
-      # 2. Setup Python
-      # ================================================================
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+
+      # ============================================================
+      # 2. SETUP PYTHON
+      # ============================================================
+
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      # ================================================================
-      # 3. Install dependencies
-      # ================================================================
+
+      # ============================================================
+      # 3. DISPLAY ENVIRONMENT
+      # ============================================================
+
+      - name: Display environment information
+        run: |
+          echo "=============================================="
+          echo "Environment Information"
+          echo "=============================================="
+
+          python --version
+          pip --version
+          pytest --version || true
+
+          echo ""
+          echo "Operating System:"
+          uname -a
+
+          echo ""
+          echo "Working Directory:"
+          pwd
+
+          echo ""
+          echo "=============================================="
+
+
+      # ============================================================
+      # 4. INSTALL PYTHON DEPENDENCIES
+      # ============================================================
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+
           python -m pip install -r requirements.txt
 
-      # ================================================================
-      # 4. Install Playwright Chromium
-      # ================================================================
-      - name: Install Playwright Chromium
-        run: |
-          python -m playwright install --with-deps chromium
+          python -m pip install \
+            pytest-html \
+            pytest-metadata
 
-      # ================================================================
-      # 5. Run HEADLESS
-      # ================================================================
+
+      # ============================================================
+      # 5. INSTALL PLAYWRIGHT BROWSERS
+      # ============================================================
+
+      - name: Install Playwright browsers
+        run: |
+          python -m playwright install --with-deps ${{ inputs.browser || 'chromium' }}
+
+
+      # ============================================================
+      # 6. CREATE REPORT DIRECTORIES
+      # ============================================================
+
+      - name: Create report directories
+        run: |
+          mkdir -p reports
+          mkdir -p test-results
+          mkdir -p playwright-report
+          mkdir -p screenshots
+          mkdir -p videos
+          mkdir -p traces
+
+
+      # ============================================================
+      # 7. DISPLAY TEST CONFIGURATION
+      # ============================================================
+
+      - name: Test configuration
+        run: |
+          echo "=============================================="
+          echo "Playwright CI Test Configuration"
+          echo "=============================================="
+
+          echo "Browser:"
+          echo "${{ inputs.browser || 'chromium' }}"
+
+          echo ""
+
+          echo "Test File:"
+          echo "${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}"
+
+          echo ""
+
+          echo "Headed:"
+          echo "${{ inputs.headed || false }}"
+
+          echo ""
+
+          echo "=============================================="
+
+
+      # ============================================================
+      # 8. RUN HEADLESS TESTS
+      # ============================================================
+
       - name: Run pytest - Headless
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.headed }}
-        run: |
-          pytest .\tests\test_01_LoginHRM.py
-      #ytest -v
-      #pytest .\tests\test_01_LoginHRM.py
+        continue-on-error: true
 
-      # ================================================================
-      # 6. Run HEADED
-      # ================================================================
+        run: |
+          pytest "${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}" \
+            -v \
+            --html=reports/PytestReport.html \
+            --self-contained-html \
+            --metadata "Browser=${{ inputs.browser || 'chromium' }}" \
+            --metadata "Mode=Headless" \
+            --metadata "CI=GitHub Actions"
+
+
+      # ============================================================
+      # 9. RUN HEADED TESTS
+      # ============================================================
+
       - name: Run pytest - Headed
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.headed }}
-        run: |
-          xvfb-run -a pytest -v --headed
+        continue-on-error: true
 
-      # ================================================================
-      # 7. Upload reports
-      # ================================================================
-      - name: Upload test reports
+        run: |
+          xvfb-run -a \
+          pytest "${{ inputs.test_file }}" \
+            -v \
+            --html=reports/PytestReport.html \
+            --self-contained-html \
+            --metadata "Browser=${{ inputs.browser }}" \
+            --metadata "Mode=Headed + Xvfb" \
+            --metadata "CI=GitHub Actions"
+
+
+      # ============================================================
+      # 10. CREATE PLAYWRIGHT REPORT
+      # ============================================================
+
+      - name: Generate Playwright HTML Report
         if: always()
+
+        run: |
+
+          echo "Generating Playwright HTML report..."
+
+          if [ -d "playwright-report" ]; then
+
+            echo "Playwright report directory exists."
+
+          else
+
+            mkdir -p playwright-report
+
+            cat > playwright-report/index.html <<'EOF'
+
+            <!DOCTYPE html>
+
+            <html>
+
+            <head>
+
+              <meta charset="UTF-8">
+
+              <title>Playwright CI Test Report</title>
+
+              <style>
+
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 40px;
+                  background: #f5f7fa;
+                }
+
+                .container {
+                  max-width: 1100px;
+                  margin: auto;
+                  background: white;
+                  padding: 30px;
+                  border-radius: 12px;
+                  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                }
+
+                h1 {
+                  margin-top: 0;
+                }
+
+                .card {
+                  padding: 20px;
+                  margin-top: 20px;
+                  border-radius: 10px;
+                  background: #f8fafc;
+                }
+
+                a {
+                  text-decoration: none;
+                  font-weight: bold;
+                }
+
+              </style>
+
+            </head>
+
+            <body>
+
+              <div class="container">
+
+                <h1>🎭 Playwright CI Test Report</h1>
+
+                <div class="card">
+
+                  <h2>Test Execution</h2>
+
+                  <p>
+                    <strong>Repository:</strong>
+                    ${{ github.repository }}
+                  </p>
+
+                  <p>
+                    <strong>Branch:</strong>
+                    ${{ github.ref_name }}
+                  </p>
+
+                  <p>
+                    <strong>Commit:</strong>
+                    ${{ github.sha }}
+                  </p>
+
+                  <p>
+                    <strong>Browser:</strong>
+                    ${{ inputs.browser || 'chromium' }}
+                  </p>
+
+                  <p>
+                    <strong>Headed:</strong>
+                    ${{ inputs.headed || false }}
+                  </p>
+
+                </div>
+
+                <div class="card">
+
+                  <h2>📊 Reports</h2>
+
+                  <p>
+                    <a href="../reports/PytestReport.html">
+                      🧪 Pytest HTML Report
+                    </a>
+                  </p>
+
+                  <p>
+                    <a href="../reports/">
+                      📁 Reports Directory
+                    </a>
+                  </p>
+
+                </div>
+
+                <div class="card">
+
+                  <h2>📦 Artifacts</h2>
+
+                  <p>
+                    Screenshots, videos, traces and test results
+                    are available from the GitHub Actions artifacts.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </body>
+
+            </html>
+
+            EOF
+
+          fi
+
+
+      # ============================================================
+      # 11. CREATE CI DASHBOARD
+      # ============================================================
+
+      - name: Create CI Dashboard
+        if: always()
+
+        run: |
+
+          mkdir -p reports/dashboard
+
+          cat > reports/dashboard/index.html <<'EOF'
+
+          <!DOCTYPE html>
+
+          <html>
+
+          <head>
+
+            <meta charset="UTF-8">
+
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1">
+
+            <title>Playwright CI Dashboard</title>
+
+            <style>
+
+              * {
+                box-sizing: border-box;
+              }
+
+              body {
+
+                margin: 0;
+
+                font-family:
+                  Arial,
+                  Helvetica,
+                  sans-serif;
+
+                background:
+                  linear-gradient(
+                    135deg,
+                    #eef2ff,
+                    #f8fafc
+                  );
+
+                color: #1e293b;
+
+              }
+
+              .header {
+
+                background: #111827;
+
+                color: white;
+
+                padding: 30px 40px;
+
+              }
+
+              .header h1 {
+
+                margin: 0;
+
+                font-size: 30px;
+
+              }
+
+              .header p {
+
+                margin-top: 8px;
+
+                opacity: 0.8;
+
+              }
+
+              .container {
+
+                max-width: 1200px;
+
+                margin: 30px auto;
+
+                padding: 0 20px;
+
+              }
+
+              .grid {
+
+                display: grid;
+
+                grid-template-columns:
+                  repeat(
+                    auto-fit,
+                    minmax(
+                      250px,
+                      1fr
+                    )
+                  );
+
+                gap: 20px;
+
+              }
+
+              .card {
+
+                background: white;
+
+                border-radius: 14px;
+
+                padding: 25px;
+
+                box-shadow:
+                  0 5px 20px
+                  rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                  );
+
+                transition:
+                  transform
+                  0.2s;
+
+              }
+
+              .card:hover {
+
+                transform:
+                  translateY(-4px);
+
+              }
+
+              .icon {
+
+                font-size: 35px;
+
+              }
+
+              .title {
+
+                font-size: 20px;
+
+                font-weight: bold;
+
+                margin-top: 10px;
+
+              }
+
+              .description {
+
+                color: #64748b;
+
+                margin-top: 8px;
+
+                line-height: 1.5;
+
+              }
+
+              .button {
+
+                display: inline-block;
+
+                margin-top: 18px;
+
+                padding:
+                  11px 18px;
+
+                background: #2563eb;
+
+                color: white;
+
+                border-radius: 8px;
+
+                text-decoration: none;
+
+                font-weight: bold;
+
+              }
+
+              .button:hover {
+
+                background: #1d4ed8;
+
+              }
+
+              .info {
+
+                margin-top: 30px;
+
+              }
+
+              .info table {
+
+                width: 100%;
+
+                border-collapse:
+                  collapse;
+
+              }
+
+              .info td {
+
+                padding: 12px;
+
+                border-bottom:
+                  1px solid #e2e8f0;
+
+              }
+
+              .footer {
+
+                text-align: center;
+
+                padding: 30px;
+
+                color: #64748b;
+
+              }
+
+            </style>
+
+          </head>
+
+
+          <body>
+
+
+            <div class="header">
+
+              <h1>
+                🎭 Playwright CI/CD Dashboard
+              </h1>
+
+              <p>
+                Automated UI Test Execution
+              </p>
+
+            </div>
+
+
+            <div class="container">
+
+
+              <div class="grid">
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    🧪
+                  </div>
+
+                  <div class="title">
+                    Pytest Report
+                  </div>
+
+                  <div class="description">
+
+                    Detailed pytest execution
+                    results including passed,
+                    failed and skipped tests.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="../PytestReport.html">
+
+                    Open Report
+
+                  </a>
+
+                </div>
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    📊
+                  </div>
+
+                  <div class="title">
+                    Playwright Report
+                  </div>
+
+                  <div class="description">
+
+                    Interactive Playwright
+                    execution report.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="../../playwright-report/index.html">
+
+                    Open Report
+
+                  </a>
+
+                </div>
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    📸
+                  </div>
+
+                  <div class="title">
+                    Screenshots
+                  </div>
+
+                  <div class="description">
+
+                    Screenshots captured
+                    during test execution.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="../../screenshots/">
+
+                    View Screenshots
+
+                  </a>
+
+                </div>
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    🎥
+                  </div>
+
+                  <div class="title">
+                    Videos
+                  </div>
+
+                  <div class="description">
+
+                    Playwright videos captured
+                    during test execution.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="../../videos/">
+
+                    View Videos
+
+                  </a>
+
+                </div>
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    🔍
+                  </div>
+
+                  <div class="title">
+                    Trace Viewer
+                  </div>
+
+                  <div class="description">
+
+                    Debug failed tests using
+                    Playwright traces.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="../../traces/">
+
+                    View Traces
+
+                  </a>
+
+                </div>
+
+
+                <div class="card">
+
+                  <div class="icon">
+                    📦
+                  </div>
+
+                  <div class="title">
+                    GitHub Artifact
+                  </div>
+
+                  <div class="description">
+
+                    Download complete test
+                    execution artifacts.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">
+
+                    GitHub Run
+
+                  </a>
+
+                </div>
+
+
+              </div>
+
+
+              <div class="card info">
+
+                <h2>
+                  Execution Information
+                </h2>
+
+                <table>
+
+                  <tr>
+                    <td>Repository</td>
+                    <td>
+                      ${{ github.repository }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Branch</td>
+                    <td>
+                      ${{ github.ref_name }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Commit</td>
+                    <td>
+                      ${{ github.sha }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Browser</td>
+                    <td>
+                      ${{ inputs.browser || 'chromium' }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Execution Mode</td>
+                    <td>
+                      ${{ inputs.headed && 'Headed' || 'Headless' }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Run ID</td>
+                    <td>
+                      ${{ github.run_id }}
+                    </td>
+                  </tr>
+
+                </table>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="footer">
+
+              Generated automatically by
+              GitHub Actions
+
+            </div>
+
+
+          </body>
+
+          </html>
+
+          EOF
+
+
+      # ============================================================
+      # 12. COPY REPORTS INTO DASHBOARD
+      # ============================================================
+
+      - name: Prepare dashboard files
+        if: always()
+
+        run: |
+
+          mkdir -p reports/dashboard/reports
+
+          if [ -f reports/PytestReport.html ]; then
+
+            cp reports/PytestReport.html \
+               reports/dashboard/PytestReport.html
+
+          fi
+
+
+      # ============================================================
+      # 13. UPLOAD COMPLETE ARTIFACT
+      # ============================================================
+
+      - name: Upload complete test reports
+        if: always()
+
         uses: actions/upload-artifact@v4
+
         with:
+
           name: playwright-test-reports
+
           path: |
+
             reports/
+
             test-results/
+
             playwright-report/
+
+            screenshots/
+
+            videos/
+
+            traces/
+
           if-no-files-found: ignore
+
+          retention-days: 30
+
+
+      # ============================================================
+      # 14. UPLOAD GITHUB PAGES ARTIFACT
+      # ============================================================
+
+      - name: Upload dashboard to GitHub Pages
+        if: always()
+
+        uses: actions/upload-pages-artifact@v4
+
+        with:
+
+          path: reports/dashboard/
+
+
+  # ================================================================
+  # DEPLOY DASHBOARD
+  # ================================================================
+
+  deploy:
+
+    name: Deploy Playwright Dashboard
+
+    needs: test
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    permissions:
+
+      pages: write
+
+      id-token: write
+
+
+    environment:
+
+      name: github-pages
+
+      url: ${{ steps.deployment.outputs.page_url }}
+
+
+    steps:
+
+
+      # ============================================================
+      # 15. DEPLOY
+      # ============================================================
+
+      - name: Deploy to GitHub Pages
+
+        id: deployment
+
+        uses: actions/deploy-pages@v4
