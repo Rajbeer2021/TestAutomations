@@ -1,6 +1,7 @@
 name: Playwright Tests
 
 on:
+
   push:
     branches:
       - main
@@ -10,7 +11,9 @@ on:
       - main
 
   workflow_dispatch:
+
     inputs:
+
       headed:
         description: "Run Playwright in headed mode?"
         required: true
@@ -39,8 +42,11 @@ on:
 # ================================================================
 
 permissions:
+
   contents: read
+
   pages: write
+
   id-token: write
 
 
@@ -50,8 +56,9 @@ permissions:
 
 jobs:
 
+
   # ================================================================
-  # PLAYWRIGHT TEST JOB
+  # TEST JOB
   # ================================================================
 
   test:
@@ -60,13 +67,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+
     steps:
+
 
       # ============================================================
       # 1. CHECKOUT
       # ============================================================
 
       - name: Checkout code
+
         uses: actions/checkout@v5
 
 
@@ -75,8 +85,11 @@ jobs:
       # ============================================================
 
       - name: Setup Python
+
         uses: actions/setup-python@v6
+
         with:
+
           python-version: "3.12"
 
 
@@ -85,33 +98,46 @@ jobs:
       # ============================================================
 
       - name: Display environment information
+
         run: |
+
           echo "=============================================="
+
           echo "Environment Information"
+
           echo "=============================================="
 
           python --version
+
           pip --version
+
           pytest --version || true
 
           echo ""
+
           echo "Operating System:"
+
           uname -a
 
           echo ""
+
           echo "Working Directory:"
+
           pwd
 
           echo ""
+
           echo "=============================================="
 
 
       # ============================================================
-      # 4. INSTALL PYTHON DEPENDENCIES
+      # 4. INSTALL DEPENDENCIES
       # ============================================================
 
       - name: Install dependencies
+
         run: |
+
           python -m pip install --upgrade pip
 
           python -m pip install -r requirements.txt
@@ -122,49 +148,78 @@ jobs:
 
 
       # ============================================================
-      # 5. INSTALL PLAYWRIGHT BROWSERS
+      # 5. INSTALL PLAYWRIGHT
       # ============================================================
 
       - name: Install Playwright browsers
+
         run: |
-          python -m playwright install --with-deps ${{ inputs.browser || 'chromium' }}
+
+          python -m playwright install --with-deps \
+            "${{ inputs.browser || 'chromium' }}"
 
 
       # ============================================================
-      # 6. CREATE REPORT DIRECTORIES
+      # 6. CREATE DIRECTORIES
       # ============================================================
 
       - name: Create report directories
+
         run: |
+
           mkdir -p reports
+
           mkdir -p test-results
+
           mkdir -p playwright-report
+
           mkdir -p screenshots
+
           mkdir -p videos
+
           mkdir -p traces
+
+          mkdir -p github-pages
+
+          mkdir -p github-pages/reports
+
+          mkdir -p github-pages/test-results
+
+          mkdir -p github-pages/screenshots
+
+          mkdir -p github-pages/videos
+
+          mkdir -p github-pages/traces
 
 
       # ============================================================
-      # 7. DISPLAY TEST CONFIGURATION
+      # 7. TEST CONFIGURATION
       # ============================================================
 
       - name: Test configuration
+
         run: |
+
           echo "=============================================="
+
           echo "Playwright CI Test Configuration"
+
           echo "=============================================="
 
           echo "Browser:"
+
           echo "${{ inputs.browser || 'chromium' }}"
 
           echo ""
 
           echo "Test File:"
+
           echo "${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}"
 
           echo ""
 
           echo "Headed:"
+
           echo "${{ inputs.headed || false }}"
 
           echo ""
@@ -173,15 +228,19 @@ jobs:
 
 
       # ============================================================
-      # 8. RUN HEADLESS TESTS
+      # 8. RUN HEADLESS
       # ============================================================
 
       - name: Run pytest - Headless
+
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.headed }}
+
         continue-on-error: true
 
         run: |
-          pytest "${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}" \
+
+          pytest \
+            "${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}" \
             -v \
             --html=reports/PytestReport.html \
             --self-contained-html \
@@ -191,16 +250,20 @@ jobs:
 
 
       # ============================================================
-      # 9. RUN HEADED TESTS
+      # 9. RUN HEADED
       # ============================================================
 
       - name: Run pytest - Headed
+
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.headed }}
+
         continue-on-error: true
 
         run: |
+
           xvfb-run -a \
-          pytest "${{ inputs.test_file }}" \
+          pytest \
+            "${{ inputs.test_file }}" \
             -v \
             --html=reports/PytestReport.html \
             --self-contained-html \
@@ -210,163 +273,151 @@ jobs:
 
 
       # ============================================================
-      # 10. CREATE PLAYWRIGHT REPORT
+      # 10. SHOW GENERATED FILES
       # ============================================================
 
-      - name: Generate Playwright HTML Report
+      - name: Show generated reports
+
         if: always()
 
         run: |
 
-          echo "Generating Playwright HTML report..."
+          echo "=============================================="
 
-          if [ -d "playwright-report" ]; then
+          echo "Generated Files"
 
-            echo "Playwright report directory exists."
+          echo "=============================================="
+
+          echo ""
+
+          echo "Reports:"
+
+          find reports -type f -print || true
+
+          echo ""
+
+          echo "Test Results:"
+
+          find test-results -type f -print || true
+
+          echo ""
+
+          echo "Screenshots:"
+
+          find screenshots -type f -print || true
+
+          echo ""
+
+          echo "Videos:"
+
+          find videos -type f -print || true
+
+          echo ""
+
+          echo "Traces:"
+
+          find traces -type f -print || true
+
+          echo ""
+
+          echo "=============================================="
+
+
+      # ============================================================
+      # 11. PREPARE GITHUB PAGES
+      # ============================================================
+
+      - name: Prepare GitHub Pages files
+
+        if: always()
+
+        run: |
+
+          echo "Preparing GitHub Pages deployment..."
+
+          # --------------------------------------------------------
+          # Copy Pytest report
+          # --------------------------------------------------------
+
+          if [ -f "reports/PytestReport.html" ]; then
+
+            cp reports/PytestReport.html \
+              github-pages/PytestReport.html
 
           else
 
-            mkdir -p playwright-report
+            cat > github-pages/PytestReport.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Pytest Report</title>
+          </head>
+          <body>
+            <h1>Pytest Report Not Available</h1>
+            <p>No PytestReport.html was generated.</p>
+          </body>
+          </html>
+          EOF
 
-            cat > playwright-report/index.html <<'EOF'
+          fi
 
-            <!DOCTYPE html>
 
-            <html>
+          # --------------------------------------------------------
+          # Copy test artifacts
+          # --------------------------------------------------------
 
-            <head>
+          if [ -d "test-results" ]; then
 
-              <meta charset="UTF-8">
+            cp -r test-results/. \
+              github-pages/test-results/ || true
 
-              <title>Playwright CI Test Report</title>
+          fi
 
-              <style>
 
-                body {
-                  font-family: Arial, sans-serif;
-                  margin: 40px;
-                  background: #f5f7fa;
-                }
+          if [ -d "screenshots" ]; then
 
-                .container {
-                  max-width: 1100px;
-                  margin: auto;
-                  background: white;
-                  padding: 30px;
-                  border-radius: 12px;
-                  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                }
+            cp -r screenshots/. \
+              github-pages/screenshots/ || true
 
-                h1 {
-                  margin-top: 0;
-                }
+          fi
 
-                .card {
-                  padding: 20px;
-                  margin-top: 20px;
-                  border-radius: 10px;
-                  background: #f8fafc;
-                }
 
-                a {
-                  text-decoration: none;
-                  font-weight: bold;
-                }
+          if [ -d "videos" ]; then
 
-              </style>
+            cp -r videos/. \
+              github-pages/videos/ || true
 
-            </head>
+          fi
 
-            <body>
 
-              <div class="container">
+          if [ -d "traces" ]; then
 
-                <h1>🎭 Playwright CI Test Report</h1>
+            cp -r traces/. \
+              github-pages/traces/ || true
 
-                <div class="card">
+          fi
 
-                  <h2>Test Execution</h2>
 
-                  <p>
-                    <strong>Repository:</strong>
-                    ${{ github.repository }}
-                  </p>
+          if [ -d "reports" ]; then
 
-                  <p>
-                    <strong>Branch:</strong>
-                    ${{ github.ref_name }}
-                  </p>
-
-                  <p>
-                    <strong>Commit:</strong>
-                    ${{ github.sha }}
-                  </p>
-
-                  <p>
-                    <strong>Browser:</strong>
-                    ${{ inputs.browser || 'chromium' }}
-                  </p>
-
-                  <p>
-                    <strong>Headed:</strong>
-                    ${{ inputs.headed || false }}
-                  </p>
-
-                </div>
-
-                <div class="card">
-
-                  <h2>📊 Reports</h2>
-
-                  <p>
-                    <a href="../reports/PytestReport.html">
-                      🧪 Pytest HTML Report
-                    </a>
-                  </p>
-
-                  <p>
-                    <a href="../reports/">
-                      📁 Reports Directory
-                    </a>
-                  </p>
-
-                </div>
-
-                <div class="card">
-
-                  <h2>📦 Artifacts</h2>
-
-                  <p>
-                    Screenshots, videos, traces and test results
-                    are available from the GitHub Actions artifacts.
-                  </p>
-
-                </div>
-
-              </div>
-
-            </body>
-
-            </html>
-
-            EOF
+            cp -r reports/. \
+              github-pages/reports/ || true
 
           fi
 
 
       # ============================================================
-      # 11. CREATE CI DASHBOARD
+      # 12. CREATE CI DASHBOARD
       # ============================================================
 
       - name: Create CI Dashboard
+
         if: always()
 
         run: |
 
-          mkdir -p reports/dashboard
-
-          cat > reports/dashboard/index.html <<'EOF'
-
+          cat > github-pages/index.html <<'EOF'
           <!DOCTYPE html>
 
           <html>
@@ -378,7 +429,7 @@ jobs:
             <meta name="viewport"
                   content="width=device-width, initial-scale=1">
 
-            <title>Playwright CI Dashboard</title>
+            <title>Playwright CI/CD Dashboard</title>
 
             <style>
 
@@ -406,41 +457,46 @@ jobs:
 
               }
 
+
               .header {
 
                 background: #111827;
 
                 color: white;
 
-                padding: 30px 40px;
+                padding: 35px 45px;
 
               }
+
 
               .header h1 {
 
                 margin: 0;
 
-                font-size: 30px;
+                font-size: 32px;
 
               }
+
 
               .header p {
 
-                margin-top: 8px;
+                margin: 10px 0 0;
 
-                opacity: 0.8;
+                color: #cbd5e1;
 
               }
+
 
               .container {
 
                 max-width: 1200px;
 
-                margin: 30px auto;
+                margin: 35px auto;
 
                 padding: 0 20px;
 
               }
+
 
               .grid {
 
@@ -450,85 +506,102 @@ jobs:
                   repeat(
                     auto-fit,
                     minmax(
-                      250px,
+                      260px,
                       1fr
                     )
                   );
 
-                gap: 20px;
+                gap: 22px;
 
               }
+
 
               .card {
 
                 background: white;
 
-                border-radius: 14px;
+                border-radius: 16px;
 
-                padding: 25px;
+                padding: 26px;
 
                 box-shadow:
-                  0 5px 20px
+                  0 8px 25px
                   rgba(
-                    0,
-                    0,
-                    0,
+                    15,
+                    23,
+                    42,
                     0.08
                   );
 
                 transition:
-                  transform
-                  0.2s;
+                  transform 0.2s,
+                  box-shadow 0.2s;
 
               }
+
 
               .card:hover {
 
                 transform:
-                  translateY(-4px);
+                  translateY(-5px);
+
+                box-shadow:
+                  0 14px 35px
+                  rgba(
+                    15,
+                    23,
+                    42,
+                    0.12
+                  );
 
               }
+
 
               .icon {
 
-                font-size: 35px;
+                font-size: 40px;
 
               }
+
 
               .title {
 
-                font-size: 20px;
+                font-size: 21px;
 
                 font-weight: bold;
 
-                margin-top: 10px;
+                margin-top: 12px;
 
               }
+
 
               .description {
 
                 color: #64748b;
 
-                margin-top: 8px;
+                margin-top: 10px;
 
-                line-height: 1.5;
+                line-height: 1.6;
+
+                min-height: 50px;
 
               }
+
 
               .button {
 
                 display: inline-block;
 
-                margin-top: 18px;
+                margin-top: 20px;
 
                 padding:
-                  11px 18px;
+                  11px 20px;
 
                 background: #2563eb;
 
                 color: white;
 
-                border-radius: 8px;
+                border-radius: 9px;
 
                 text-decoration: none;
 
@@ -536,17 +609,20 @@ jobs:
 
               }
 
+
               .button:hover {
 
                 background: #1d4ed8;
 
               }
 
+
               .info {
 
                 margin-top: 30px;
 
               }
+
 
               .info table {
 
@@ -557,20 +633,31 @@ jobs:
 
               }
 
+
               .info td {
 
-                padding: 12px;
+                padding: 13px;
 
                 border-bottom:
                   1px solid #e2e8f0;
 
               }
 
+
+              .info td:first-child {
+
+                font-weight: bold;
+
+                width: 220px;
+
+              }
+
+
               .footer {
 
                 text-align: center;
 
-                padding: 30px;
+                padding: 35px;
 
                 color: #64748b;
 
@@ -591,7 +678,7 @@ jobs:
               </h1>
 
               <p>
-                Automated UI Test Execution
+                Automated UI Test Execution & Reporting
               </p>
 
             </div>
@@ -602,6 +689,8 @@ jobs:
 
               <div class="grid">
 
+
+                <!-- PYTEST -->
 
                 <div class="card">
 
@@ -623,7 +712,7 @@ jobs:
 
                   <a
                     class="button"
-                    href="../PytestReport.html">
+                    href="PytestReport.html">
 
                     Open Report
 
@@ -631,6 +720,8 @@ jobs:
 
                 </div>
 
+
+                <!-- REPORTS -->
 
                 <div class="card">
 
@@ -639,26 +730,28 @@ jobs:
                   </div>
 
                   <div class="title">
-                    Playwright Report
+                    Test Reports
                   </div>
 
                   <div class="description">
 
-                    Interactive Playwright
-                    execution report.
+                    Additional generated test
+                    reports and execution files.
 
                   </div>
 
                   <a
                     class="button"
-                    href="../../playwright-report/index.html">
+                    href="reports/">
 
-                    Open Report
+                    Open Reports
 
                   </a>
 
                 </div>
 
+
+                <!-- SCREENSHOTS -->
 
                 <div class="card">
 
@@ -672,14 +765,14 @@ jobs:
 
                   <div class="description">
 
-                    Screenshots captured
-                    during test execution.
+                    Screenshots captured during
+                    Playwright test execution.
 
                   </div>
 
                   <a
                     class="button"
-                    href="../../screenshots/">
+                    href="screenshots/">
 
                     View Screenshots
 
@@ -687,6 +780,8 @@ jobs:
 
                 </div>
 
+
+                <!-- VIDEOS -->
 
                 <div class="card">
 
@@ -700,14 +795,14 @@ jobs:
 
                   <div class="description">
 
-                    Playwright videos captured
-                    during test execution.
+                    Browser execution recordings
+                    from Playwright tests.
 
                   </div>
 
                   <a
                     class="button"
-                    href="../../videos/">
+                    href="videos/">
 
                     View Videos
 
@@ -716,6 +811,8 @@ jobs:
                 </div>
 
 
+                <!-- TRACES -->
+
                 <div class="card">
 
                   <div class="icon">
@@ -723,19 +820,19 @@ jobs:
                   </div>
 
                   <div class="title">
-                    Trace Viewer
+                    Trace Files
                   </div>
 
                   <div class="description">
 
-                    Debug failed tests using
-                    Playwright traces.
+                    Playwright trace files for
+                    debugging failed tests.
 
                   </div>
 
                   <a
                     class="button"
-                    href="../../traces/">
+                    href="traces/">
 
                     View Traces
 
@@ -744,20 +841,52 @@ jobs:
                 </div>
 
 
+                <!-- TEST RESULTS -->
+
                 <div class="card">
 
                   <div class="icon">
-                    📦
+                    📁
                   </div>
 
                   <div class="title">
-                    GitHub Artifact
+                    Test Results
                   </div>
 
                   <div class="description">
 
-                    Download complete test
-                    execution artifacts.
+                    Raw Playwright and pytest
+                    test result files.
+
+                  </div>
+
+                  <a
+                    class="button"
+                    href="test-results/">
+
+                    View Results
+
+                  </a>
+
+                </div>
+
+
+                <!-- GITHUB -->
+
+                <div class="card">
+
+                  <div class="icon">
+                    ⚙️
+                  </div>
+
+                  <div class="title">
+                    GitHub Actions
+                  </div>
+
+                  <div class="description">
+
+                    Open the complete GitHub
+                    Actions execution.
 
                   </div>
 
@@ -765,7 +894,7 @@ jobs:
                     class="button"
                     href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">
 
-                    GitHub Run
+                    Open CI Run
 
                   </a>
 
@@ -775,6 +904,8 @@ jobs:
               </div>
 
 
+              <!-- EXECUTION INFORMATION -->
+
               <div class="card info">
 
                 <h2>
@@ -783,47 +914,97 @@ jobs:
 
                 <table>
 
+
                   <tr>
-                    <td>Repository</td>
+
+                    <td>
+                      Repository
+                    </td>
+
                     <td>
                       ${{ github.repository }}
                     </td>
+
                   </tr>
 
+
                   <tr>
-                    <td>Branch</td>
+
+                    <td>
+                      Branch
+                    </td>
+
                     <td>
                       ${{ github.ref_name }}
                     </td>
+
                   </tr>
 
+
                   <tr>
-                    <td>Commit</td>
+
+                    <td>
+                      Commit
+                    </td>
+
                     <td>
                       ${{ github.sha }}
                     </td>
+
                   </tr>
 
+
                   <tr>
-                    <td>Browser</td>
+
+                    <td>
+                      Browser
+                    </td>
+
                     <td>
                       ${{ inputs.browser || 'chromium' }}
                     </td>
+
                   </tr>
 
+
                   <tr>
-                    <td>Execution Mode</td>
+
                     <td>
-                      ${{ inputs.headed && 'Headed' || 'Headless' }}
+                      Execution Mode
                     </td>
+
+                    <td>
+                      ${{ inputs.headed && 'Headed + Xvfb' || 'Headless' }}
+                    </td>
+
                   </tr>
 
+
                   <tr>
-                    <td>Run ID</td>
+
+                    <td>
+                      Test File
+                    </td>
+
+                    <td>
+                      ${{ inputs.test_file || 'tests/test_01_LoginHRM.py' }}
+                    </td>
+
+                  </tr>
+
+
+                  <tr>
+
+                    <td>
+                      Run ID
+                    </td>
+
                     <td>
                       ${{ github.run_id }}
                     </td>
+
                   </tr>
+
 
                 </table>
 
@@ -844,34 +1025,38 @@ jobs:
           </body>
 
           </html>
-
           EOF
 
 
       # ============================================================
-      # 12. COPY REPORTS INTO DASHBOARD
+      # 13. SHOW PAGES CONTENT
       # ============================================================
 
-      - name: Prepare dashboard files
+      - name: Show GitHub Pages content
+
         if: always()
 
         run: |
 
-          mkdir -p reports/dashboard/reports
+          echo "=============================================="
 
-          if [ -f reports/PytestReport.html ]; then
+          echo "GitHub Pages Files"
 
-            cp reports/PytestReport.html \
-               reports/dashboard/PytestReport.html
+          echo "=============================================="
 
-          fi
+          find github-pages -type f -print
+
+          echo ""
+
+          echo "=============================================="
 
 
       # ============================================================
-      # 13. UPLOAD COMPLETE ARTIFACT
+      # 14. UPLOAD COMPLETE ARTIFACT
       # ============================================================
 
       - name: Upload complete test reports
+
         if: always()
 
         uses: actions/upload-artifact@v4
@@ -894,27 +1079,30 @@ jobs:
 
             traces/
 
+            github-pages/
+
           if-no-files-found: ignore
 
           retention-days: 30
 
 
       # ============================================================
-      # 14. UPLOAD GITHUB PAGES ARTIFACT
+      # 15. UPLOAD GITHUB PAGES
       # ============================================================
 
       - name: Upload dashboard to GitHub Pages
+
         if: always()
 
         uses: actions/upload-pages-artifact@v4
 
         with:
 
-          path: reports/dashboard/
+          path: github-pages/
 
 
   # ================================================================
-  # DEPLOY DASHBOARD
+  # DEPLOY JOB
   # ================================================================
 
   deploy:
@@ -926,6 +1114,7 @@ jobs:
     if: always()
 
     runs-on: ubuntu-latest
+
 
     permissions:
 
@@ -945,7 +1134,7 @@ jobs:
 
 
       # ============================================================
-      # 15. DEPLOY
+      # DEPLOY
       # ============================================================
 
       - name: Deploy to GitHub Pages
